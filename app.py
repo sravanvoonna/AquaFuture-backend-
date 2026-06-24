@@ -284,12 +284,20 @@ with app.app_context():
         print("Database is empty. Seeding realistic agricultural dataset...")
         seed_database()
 
-    # Sync latest news on startup
+    # Sync latest news on startup in a background thread
+    import threading
+    def run_sync_news():
+        with app.app_context():
+            try:
+                print("Syncing live PIB agricultural news in background thread...")
+                sync_pib_news()
+            except Exception as startup_err:
+                print("Failed to sync news in background:", startup_err)
+                
     try:
-        print("Syncing live PIB agricultural news...")
-        sync_pib_news()
+        threading.Thread(target=run_sync_news, daemon=True).start()
     except Exception as startup_err:
-        print("Failed to sync news on startup:", startup_err)
+        print("Failed to start news sync thread:", startup_err)
 
 # Health check
 @app.route("/")
