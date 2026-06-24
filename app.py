@@ -1626,7 +1626,10 @@ Provide a brief, professional explanation of the water's present position and li
 
 @app.route("/api/aquafuture/tts", methods=["POST"])
 def aquafuture_tts():
-    if not sarvam_api_key:
+    # Dynamically read key in case it was loaded after initial load
+    key = os.getenv("SARVAM_API_KEY") or sarvam_api_key
+    print("[aquafuture_tts] Global Key:", sarvam_api_key, "Dynamic Key:", key)
+    if not key:
         return jsonify({
             "error": "Sarvam API key is not configured in the backend .env file.",
             "code": "API_KEY_MISSING"
@@ -1643,7 +1646,7 @@ def aquafuture_tts():
         response = requests.post('https://api.sarvam.ai/text-to-speech', 
             headers={
                 'Content-Type': 'application/json',
-                'api-subscription-key': sarvam_api_key
+                'api-subscription-key': key
             },
             json={
                 'text': text,
